@@ -6,48 +6,57 @@
     <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: "Segoe UI", sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             height: 100vh;
+            color: #333;
         }
-        /* サイドバー */
+
+        /* ===== サイドバー ===== */
         .sidebar {
-            width: 250px;
+            width: 260px;
             padding: 20px;
             border-right: 1px solid #ddd;
             box-sizing: border-box;
             overflow-y: auto;
-        }
-        /* メインコンテンツ */
-        .main {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
+            background: #fafafa;
         }
 
         .filters h2 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            font-size: 1.1em;
+            margin: 15px 0 8px;
             border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
+            padding-bottom: 4px;
         }
 
-        .filter-group {
-            margin-bottom: 20px;
+        .filter-group label {
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
         }
 
-            .filter-group label {
-                display: block;
-                margin-bottom: 5px;
-                cursor: pointer;
-            }
+        /* 画像フィルター用 */
+        .filter-group img {
+            vertical-align: middle;
+            width: 32px;
+            height: 32px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            padding: 2px;
+            transition: 0.2s;
+        }
 
-            .filter-group input[type="checkbox"],
-            .filter-group input[type="radio"] {
-                margin-right: 8px;
-            }
+        .filter-group input[type="checkbox"],
+        .filter-group input[type="radio"] {
+            display: none;
+        }
+
+        .filter-group input:checked + img {
+            border-color: #007BFF;
+            background: #eef6ff;
+        }
 
         #search {
             width: 100%;
@@ -55,6 +64,16 @@
             box-sizing: border-box;
             margin-bottom: 20px;
             font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* ===== メイン ===== */
+        .main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fff;
         }
 
         .card-grid {
@@ -64,59 +83,107 @@
         }
 
         .card {
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 6px;
-            padding: 15px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            padding: 10px;
+            box-shadow: 1px 1px 5px rgba(0,0,0,0.08);
             box-sizing: border-box;
+            background: #fff;
+            transition: transform 0.2s;
         }
 
+            .card:hover {
+                transform: translateY(-3px);
+                box-shadow: 2px 2px 10px rgba(0,0,0,0.15);
+            }
+
             .card .title {
-                font-size: 1.1em;
-                margin-bottom: 10px;
+                font-size: 1em;
                 font-weight: bold;
+                margin-bottom: 5px;
             }
 
             .card .sub {
                 color: #666;
-                font-size: 0.9em;
-                margin-bottom: 10px;
+                font-size: 0.85em;
+                margin-bottom: 8px;
+            }
+
+        .card-img {
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            .card-img:hover {
+                opacity: 0.8;
+            }
+
+        /* ===== モーダル ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+            .modal img {
+                max-width: 90%;
+                max-height: 90%;
+                border-radius: 8px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.5);
+                background: #fff;
+                padding: 5px;
             }
     </style>
 </head>
 <body>
 
+    <!-- サイドバー -->
     <div class="sidebar">
-        <input type="text" id="search" placeholder="カード名またはテキスト検索">
+        <input type="text" id="search" placeholder="カード名やテキストで検索">
 
         <div class="filters">
             <div class="filter-group">
                 <h2>レアリティ</h2>
-                <label><input type="checkbox" class="rarity" value="Common"> Common</label>
-                <label><input type="checkbox" class="rarity" value="Rare"> Rare</label>
-                <label><input type="checkbox" class="rarity" value="Legendary"> Legendary</label>
+                <label><input type="checkbox" class="rarity" value="Common"><span>Common</span></label>
+                <label><input type="checkbox" class="rarity" value="Rare"><span>Rare</span></label>
+                <label><input type="checkbox" class="rarity" value="Legendary"><span>Legendary</span></label>
             </div>
 
             <div class="filter-group">
                 <h2>色</h2>
-                <label><input type="checkbox" class="color" value="Red"> Red</label>
-                <label><input type="checkbox" class="color" value="White"> White</label>
-                <label><input type="checkbox" class="color" value="Blue"> Blue</label>
-                <label><input type="checkbox" class="color" value="Green"> Green</label>
+                <!-- 画像アイコンで選択 -->
+                <label><input type="checkbox" class="color" value="Red"><img src="icons/red.png" alt="Red"></label>
+                <label><input type="checkbox" class="color" value="Blue"><img src="icons/blue.png" alt="Blue"></label>
+                <label><input type="checkbox" class="color" value="Green"><img src="icons/green.png" alt="Green"></label>
             </div>
 
             <div class="filter-group">
                 <h2>コスト</h2>
-                <label><input type="radio" name="cost" value="" checked> 指定なし</label>
-                <label><input type="radio" name="cost" value="0-3"> 0〜3</label>
-                <label><input type="radio" name="cost" value="4-6"> 4〜6</label>
-                <label><input type="radio" name="cost" value="7+"> 7以上</label>
+                <label><input type="radio" name="cost" value="" checked><span>指定なし</span></label>
+                <label><input type="radio" name="cost" value="0-3"><span>0〜3</span></label>
+                <label><input type="radio" name="cost" value="4-6"><span>4〜6</span></label>
+                <label><input type="radio" name="cost" value="7+"><span>7以上</span></label>
             </div>
         </div>
     </div>
 
+    <!-- メイン表示 -->
     <div class="main">
         <div id="results" class="card-grid"></div>
+    </div>
+
+    <!-- モーダル -->
+    <div id="imageModal" class="modal">
+        <img id="modalImage" src="" alt="カード画像">
     </div>
 
     <script>
@@ -140,13 +207,21 @@
                 <div class="title">${c.name}</div>
                 <div class="sub">レアリティ：${c.rarity} | 色：${c.color} | コスト：${c.cost}</div>
                 <div>${c.text}</div>
+                ${c.image ? `<img src="${c.image}" alt="${c.name}" class="card-img">` : ""}
               </div>
             `).join("");
+
+                // 画像クリックで拡大表示
+                document.querySelectorAll(".card-img").forEach(img => {
+                    img.addEventListener("click", () => {
+                        document.getElementById("modalImage").src = img.src;
+                        document.getElementById("imageModal").style.display = "flex";
+                    });
+                });
             }
 
             function filter() {
                 const keyword = document.getElementById("search").value.trim();
-
                 let results = keyword ? fuse.search(keyword).map(r => r.item) : cards;
 
                 // レアリティ
@@ -164,19 +239,15 @@
                 // コスト
                 const costVal = document.querySelector("input[name='cost']:checked").value;
                 if (costVal) {
-                    if (costVal === "0-3") {
-                        results = results.filter(c => c.cost >= 0 && c.cost <= 3);
-                    } else if (costVal === "4-6") {
-                        results = results.filter(c => c.cost >= 4 && c.cost <= 6);
-                    } else if (costVal === "7+") {
-                        results = results.filter(c => c.cost >= 7);
-                    }
+                    if (costVal === "0-3") results = results.filter(c => c.cost >= 0 && c.cost <= 3);
+                    else if (costVal === "4-6") results = results.filter(c => c.cost >= 4 && c.cost <= 6);
+                    else if (costVal === "7+") results = results.filter(c => c.cost >= 7);
                 }
 
                 render(results);
             }
 
-            // イベントリスナー登録
+            // イベントリスナー
             document.getElementById("search").addEventListener("input", filter);
             document.querySelectorAll(".rarity, .color, input[name='cost']").forEach(el => {
                 el.addEventListener("change", filter);
@@ -185,6 +256,11 @@
             // 初期表示
             render(cards);
         }
+
+        // モーダルを閉じる処理
+        document.getElementById("imageModal").addEventListener("click", () => {
+            document.getElementById("imageModal").style.display = "none";
+        });
 
         init();
     </script>

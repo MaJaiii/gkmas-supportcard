@@ -1,22 +1,18 @@
 [
-  {
-    "id": 1,
-    "name": "Fire Dragon",
-    "type": "Creature",
-    "cost": 5,
-    "attack": 8,
-    "rarity": "Rare",
-    "color": "Red",
-    "text": "Breathes fire to destroy enemies."
-  },
-  {
-    "id": 2,
-    "name": "Healing Light",
-    "type": "Spell",
-    "cost": 2,
-    "attack": 0,
-    "rarity": "Common",
-    "color": "White",
-    "text": "Restore 5 health."
-  }
+    {
+        "name": "Fire Dragon",
+        "rarity": "Legendary",
+        "color": "Red",
+        "cost": 7,
+        "text": "強力な火炎攻撃を放つ。",
+        "image": "cards/fire_dragon.jpg"
+    },
+    {
+        "name": "Water Spirit",
+        "rarity": "Rare",
+        "color": "Blue",
+        "cost": 3,
+        "text": "癒しの力を持つ精霊。",
+        "image": "cards/water_spirit.jpg"
+    }
 ]
