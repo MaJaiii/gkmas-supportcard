@@ -1,110 +1,193 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>カード検索</title>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .filters { margin: 15px 0; }
-    .filter-group { margin-bottom: 10px; }
-    .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; }
-    label { margin-right: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>カード検索</title>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+        /* サイドバー */
+        .sidebar {
+            width: 250px;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        /* メインコンテンツ */
+        .main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .filters h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+            .filter-group label {
+                display: block;
+                margin-bottom: 5px;
+                cursor: pointer;
+            }
+
+            .filter-group input[type="checkbox"],
+            .filter-group input[type="radio"] {
+                margin-right: 8px;
+            }
+
+        #search {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-gap: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+            .card .title {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+
+            .card .sub {
+                color: #666;
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+    </style>
 </head>
 <body>
-  <h1>カード検索</h1>
 
-  <!-- キーワード検索 -->
-  <input type="text" id="search" placeholder="名前・テキスト検索">
+    <div class="sidebar">
+        <input type="text" id="search" placeholder="カード名またはテキスト検索">
 
-  <!-- フィルター -->
-  <div class="filters">
-    <!-- レアリティ -->
-    <div class="filter-group">
-      <strong>レアリティ:</strong><br>
-      <label><input type="checkbox" class="rarity" value="Common"> Common</label>
-      <label><input type="checkbox" class="rarity" value="Rare"> Rare</label>
+        <div class="filters">
+            <div class="filter-group">
+                <h2>レアリティ</h2>
+                <label><input type="checkbox" class="rarity" value="Common"> Common</label>
+                <label><input type="checkbox" class="rarity" value="Rare"> Rare</label>
+                <label><input type="checkbox" class="rarity" value="Legendary"> Legendary</label>
+            </div>
+
+            <div class="filter-group">
+                <h2>色</h2>
+                <label><input type="checkbox" class="color" value="Red"> Red</label>
+                <label><input type="checkbox" class="color" value="White"> White</label>
+                <label><input type="checkbox" class="color" value="Blue"> Blue</label>
+                <label><input type="checkbox" class="color" value="Green"> Green</label>
+            </div>
+
+            <div class="filter-group">
+                <h2>コスト</h2>
+                <label><input type="radio" name="cost" value="" checked> 指定なし</label>
+                <label><input type="radio" name="cost" value="0-3"> 0〜3</label>
+                <label><input type="radio" name="cost" value="4-6"> 4〜6</label>
+                <label><input type="radio" name="cost" value="7+"> 7以上</label>
+            </div>
+        </div>
     </div>
 
-    <!-- 色 -->
-    <div class="filter-group">
-      <strong>色:</strong><br>
-      <label><input type="checkbox" class="color" value="Red"> Red</label>
-      <label><input type="checkbox" class="color" value="White"> White</label>
-      <label><input type="checkbox" class="color" value="Blue"> Blue</label>
-      <label><input type="checkbox" class="color" value="Green"> Green</label>
+    <div class="main">
+        <div id="results" class="card-grid"></div>
     </div>
 
-    <!-- コスト -->
-    <div class="filter-group">
-      <strong>コスト:</strong><br>
-      <label><input type="radio" name="cost" value="" checked> 指定なし</label>
-      <label><input type="radio" name="cost" value="low"> 5以下</label>
-      <label><input type="radio" name="cost" value="high"> 6以上</label>
-    </div>
-  </div>
+    <script>
+        async function init() {
+            const res = await fetch("cards.json");
+            const cards = await res.json();
 
-  <!-- 検索結果 -->
-  <div id="results"></div>
+            const fuse = new Fuse(cards, {
+                keys: ["name", "text"],
+                threshold: 0.3
+            });
 
-  <script>
-    async function init() {
-      const res = await fetch("cards.json");
-      const cards = await res.json();
+            function render(list) {
+                const container = document.getElementById("results");
+                if (list.length === 0) {
+                    container.innerHTML = "<p>カードが見つかりませんでした。</p>";
+                    return;
+                }
+                container.innerHTML = list.map(c => `
+              <div class="card">
+                <div class="title">${c.name}</div>
+                <div class="sub">レアリティ：${c.rarity} | 色：${c.color} | コスト：${c.cost}</div>
+                <div>${c.text}</div>
+              </div>
+            `).join("");
+            }
 
-      const fuse = new Fuse(cards, {
-        keys: ["name", "text"],
-        threshold: 0.3
-      });
+            function filter() {
+                const keyword = document.getElementById("search").value.trim();
 
-      function render(list) {
-        document.getElementById("results").innerHTML =
-          list.map(c => `<div class="card">
-            <strong>${c.name}</strong> [${c.rarity}]<br>
-            Type: ${c.type}, Cost: ${c.cost}, Atk: ${c.attack}, Color: ${c.color}<br>
-            ${c.text}
-          </div>`).join("");
-      }
+                let results = keyword ? fuse.search(keyword).map(r => r.item) : cards;
 
-      function filter() {
-        const keyword = document.getElementById("search").value;
+                // レアリティ
+                const rarities = Array.from(document.querySelectorAll(".rarity:checked")).map(el => el.value);
+                if (rarities.length > 0) {
+                    results = results.filter(c => rarities.includes(c.rarity));
+                }
 
-        // Fuse.js でキーワード検索
-        let results = keyword ? fuse.search(keyword).map(r => r.item) : cards;
+                // 色
+                const colors = Array.from(document.querySelectorAll(".color:checked")).map(el => el.value);
+                if (colors.length > 0) {
+                    results = results.filter(c => colors.includes(c.color));
+                }
 
-        // レアリティフィルター
-        const selectedRarity = Array.from(document.querySelectorAll(".rarity:checked")).map(cb => cb.value);
-        if (selectedRarity.length > 0) {
-          results = results.filter(c => selectedRarity.includes(c.rarity));
+                // コスト
+                const costVal = document.querySelector("input[name='cost']:checked").value;
+                if (costVal) {
+                    if (costVal === "0-3") {
+                        results = results.filter(c => c.cost >= 0 && c.cost <= 3);
+                    } else if (costVal === "4-6") {
+                        results = results.filter(c => c.cost >= 4 && c.cost <= 6);
+                    } else if (costVal === "7+") {
+                        results = results.filter(c => c.cost >= 7);
+                    }
+                }
+
+                render(results);
+            }
+
+            // イベントリスナー登録
+            document.getElementById("search").addEventListener("input", filter);
+            document.querySelectorAll(".rarity, .color, input[name='cost']").forEach(el => {
+                el.addEventListener("change", filter);
+            });
+
+            // 初期表示
+            render(cards);
         }
 
-        // 色フィルター
-        const selectedColors = Array.from(document.querySelectorAll(".color:checked")).map(cb => cb.value);
-        if (selectedColors.length > 0) {
-          results = results.filter(c => selectedColors.includes(c.color));
-        }
+        init();
+    </script>
 
-        // コストフィルター
-        const costFilter = document.querySelector("input[name='cost']:checked").value;
-        if (costFilter === "low") {
-          results = results.filter(c => c.cost <= 5);
-        } else if (costFilter === "high") {
-          results = results.filter(c => c.cost >= 6);
-        }
-
-        render(results);
-      }
-
-      // イベントリスナー
-      document.getElementById("search").addEventListener("input", filter);
-      document.querySelectorAll(".rarity, .color, input[name='cost']").forEach(el => {
-        el.addEventListener("change", filter);
-      });
-
-      render(cards);
-    }
-    init();
-  </script>
 </body>
 </html>
