@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>カード検索</title>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>カード検索</h1>
+  <input type="text" id="search" placeholder="名前・テキスト検索">
+  <select id="rarity">
+    <option value="">レアリティ指定なし</option>
+    <option value="Common">Common</option>
+    <option value="Rare">Rare</option>
+  </select>
+  <div id="results"></div>
+
+  <script>
+    async function init() {
+      const res = await fetch("cards.json");
+      const cards = await res.json();
+
+      const fuse = new Fuse(cards, {
+        keys: ["name", "text"],
+        threshold: 0.3
+      });
+
+      function render(list) {
+        document.getElementById("results").innerHTML =
+          list.map(c => `<div class="card">
+            <strong>${c.name}</strong> [${c.rarity}]<br>
+            Type: ${c.type}, Cost: ${c.cost}, Atk: ${c.attack}<br>
+            ${c.text}
+          </div>`).join("");
+      }
+
+      function filter() {
+        const keyword = document.getElementById("search").value;
+        const rarity = document.getElementById("rarity").value;
+
+        let results = keyword ? fuse.search(keyword).map(r => r.item) : cards;
+        if (rarity) results = results.filter(c => c.rarity === rarity);
+
+        render(results);
+      }
+
+      document.getElementById("search").addEventListener("input", filter);
+      document.getElementById("rarity").addEventListener("change", filter);
+
+      render(cards);
+    }
+    init();
+  </script>
+</body>
+</html>

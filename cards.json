@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Fire Dragon",
+    "type": "Creature",
+    "cost": 5,
+    "attack": 8,
+    "rarity": "Rare",
+    "color": "Red",
+    "text": "Breathes fire to destroy enemies."
+  },
+  {
+    "id": 2,
+    "name": "Healing Light",
+    "type": "Spell",
+    "cost": 2,
+    "attack": 0,
+    "rarity": "Common",
+    "color": "White",
+    "text": "Restore 5 health."
+  }
+]
