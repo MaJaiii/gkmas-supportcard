@@ -1,18 +1,54 @@
 [
     {
-        "name": "Fire Dragon",
-        "rarity": "Legendary",
+        "name": "Flame Warrior",
         "color": "Red",
-        "cost": 7,
-        "text": "強力な火炎攻撃を放つ。",
-        "image": "cards/fire_dragon.jpg"
+        "rarity": "Rare",
+        "level": 2,
+        "trait": "センス",
+        "mainEffects": [
+            {
+                "text": "攻撃力+2",
+                "tags": [ "攻撃" ]
+            },
+            {
+                "text": "火炎ダメージ+1",
+                "tags": [ "攻撃", "火" ]
+            }
+        ],
+        "subEffects": [
+            {
+                "text": "コスト-1",
+                "tags": [ "コスト軽減" ]
+            },
+            {
+                "text": "ドロー+1",
+                "tags": [ "ドロー" ]
+            }
+        ],
+        "image": "cards/flame_warrior.jpg"
     },
     {
-        "name": "Water Spirit",
-        "rarity": "Rare",
+        "name": "Logic Mage",
         "color": "Blue",
-        "cost": 3,
-        "text": "癒しの力を持つ精霊。",
-        "image": "cards/water_spirit.jpg"
+        "rarity": "Legendary",
+        "level": 4,
+        "trait": "ロジック",
+        "mainEffects": [
+            {
+                "text": "魔法攻撃力+3",
+                "tags": [ "攻撃" ]
+            },
+            {
+                "text": "敵全体に防御ダウン",
+                "tags": [ "防御ダウン" ]
+            }
+        ],
+        "subEffects": [
+            {
+                "text": "ドロー+2",
+                "tags": [ "ドロー" ]
+            }
+        ],
+        "image": "cards/logic_mage.jpg"
     }
 ]
