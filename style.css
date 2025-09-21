@@ -1,0 +1,19 @@
+.filter-group label {
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.filter-group img {
+    vertical-align: middle;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 2px;
+    transition: 0.2s;
+}
+
+.filter-group input[type="checkbox"]:checked + img,
+.filter-group input[type="radio"]:checked + img {
+    border-color: #007BFF; /* ‘I‘ğ‚Ì˜gF */
+    background: #eef6ff;
+}
